@@ -7,7 +7,7 @@ public struct StickyAsyncImageSwiftUI: View {
     private let widthConstant: CGFloat = 100.0.responsiveW
     private let coordinateSpace: AnyHashable
     
-    init(url: URL?, size: CGFloat? = nil, coordinateSpace: AnyHashable) {
+    public init(url: URL?, size: CGFloat? = nil, coordinateSpace: AnyHashable) {
         self.url = url
         self.size = size ?? 100.0.responsiveW
         self.coordinateSpace = coordinateSpace
