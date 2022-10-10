@@ -44,7 +44,6 @@ struct PreviewCodes: View {
                     Divider()
                 }.frame(width: 90.0.responsiveW)
             }.padding(.top)
-                
         }.coordinateSpace(name: "Sticky")
             .ignoresSafeArea(edges: .top)
     }
