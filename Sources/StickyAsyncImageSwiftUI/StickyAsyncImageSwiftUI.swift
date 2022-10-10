@@ -1,7 +1,7 @@
 import SwiftUI
 
 @available(iOS 15.0, *)
-public struct StickyTopAsyncImage: View {
+public struct StickyAsyncImageSwiftUI: View {
     private let url: URL?
     private let size: CGFloat
     private let widthConstant: CGFloat = 100.0.responsiveW
@@ -25,14 +25,14 @@ public struct StickyTopAsyncImage: View {
 }
 
 #if DEBUG
-struct SwiftUIPercentChart_Previews : PreviewProvider {
+struct StickyAsyncImageSwiftUI_Previews : PreviewProvider {
     @available(iOS 13.0, *)
     static var previews: some View {
         
         if #available(iOS 15.0, *) {
             ScrollView {
-                StickyTopAsyncImage(url: URL(string: "https://soundjungle.de/wp-content/uploads/2022/10/1-Tate_McRae_main_photo_c_baeth.jpg"), coordinateSpace: "Sticky")
-                ForEach(0..<100) { number in
+                StickyAsyncImageSwiftUI(url: URL(string: "https://soundjungle.de/wp-content/uploads/2022/10/1-Tate_McRae_main_photo_c_baeth.jpg"), coordinateSpace: "Sticky")
+                ForEach(0..<10) { number in
                     Group {
                         VStack {
                             Text(number.formatted())
