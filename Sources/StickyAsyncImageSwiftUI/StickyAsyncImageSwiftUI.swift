@@ -31,7 +31,15 @@ struct SwiftUIPercentChart_Previews : PreviewProvider {
         
         if #available(iOS 15.0, *) {
             ScrollView {
-                StickyTopAsyncImage(url: URL(string: "https://cdn.smehost.net/sonymusicca-caprod/wp-content/uploads/2022/10/tatemcreaa.jpg"), coordinateSpace: "Sticky")
+                StickyTopAsyncImage(url: URL(string: "https://soundjungle.de/wp-content/uploads/2022/10/1-Tate_McRae_main_photo_c_baeth.jpg"), coordinateSpace: "Sticky")
+                ForEach(0..<100) { number in
+                    Group {
+                        VStack {
+                            Text(number.formatted())
+                        }
+                        Divider()
+                    }.frame(width: 90.0.responsiveW)
+                }.padding(.top)
             }.coordinateSpace(name: "Sticky")
                 .ignoresSafeArea(edges: .top)
             
