@@ -6,11 +6,15 @@ public struct StickyAsyncImageSwiftUI: View {
     private let size: CGFloat
     private let widthConstant: CGFloat = 100.0.responsiveW
     private let coordinateSpace: AnyHashable
+    private let isGradientOn: Bool
+    private let linearGradient: LinearGradient
     
-    public init(url: URL?, size: CGFloat? = nil, coordinateSpace: AnyHashable) {
+    public init(url: URL?, size: CGFloat? = nil, coordinateSpace: AnyHashable, isGradientOn: Bool? = nil, linearGradient: LinearGradient? = nil) {
         self.url = url
         self.size = size ?? 100.0.responsiveW
         self.coordinateSpace = coordinateSpace
+        self.isGradientOn = isGradientOn ?? false
+        self.linearGradient = linearGradient ?? LinearGradient(colors: [.clear, .accentColor], startPoint: .top, endPoint: .bottom)
     }
     
     public var body: some View {
@@ -20,6 +24,13 @@ public struct StickyAsyncImageSwiftUI: View {
            
             AnimatedAsyncImageView(url, width: size.width, height: height < self.size ? self.size : height, cornerRadius: 0)
                 .frame(width: widthConstant, height: self.size, alignment: .bottom)
+            
+            if isGradientOn {
+                Rectangle()
+                    .frame(width: size.width, height: height < self.size ? self.size : height, alignment: .bottom)
+                    .frame(width: widthConstant, height: self.size, alignment: .bottom)
+                    .foregroundStyle(linearGradient)
+            }
         }.frame(width: widthConstant, height: self.size)
     }
 }
@@ -31,7 +42,7 @@ struct StickyAsyncImageSwiftUI_Previews : PreviewProvider {
         
         if #available(iOS 15.0, *) {
             ScrollView {
-                StickyAsyncImageSwiftUI(url: URL(string: "https://soundjungle.de/wp-content/uploads/2022/10/1-Tate_McRae_main_photo_c_baeth.jpg"), coordinateSpace: "Sticky")
+                StickyAsyncImageSwiftUI(url: URL(string: "https://soundjungle.de/wp-content/uploads/2022/10/1-Tate_McRae_main_photo_c_baeth.jpg"), coordinateSpace: "Sticky", isGradientOn: true)
                 ForEach(0..<10) { number in
                     Group {
                         VStack {
@@ -101,7 +112,7 @@ private struct AnimatedAsyncImageView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                     refleshState = false
                             }
-                            }
+                        }
                 } else {
                     if isProgressViewDisable {
                         Rectangle()
