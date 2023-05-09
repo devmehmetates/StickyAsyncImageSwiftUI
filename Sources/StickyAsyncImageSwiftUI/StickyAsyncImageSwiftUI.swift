@@ -33,7 +33,7 @@ public struct StickyViewModel {
     let coordinateSpace: AnyHashable
     var linearGradient: LinearGradient?
     
-    static let _defaultModel: StickyViewModel = StickyViewModel(coordinateSpace: "Sticky")
+    public static let _defaultModel: StickyViewModel = StickyViewModel(coordinateSpace: "Sticky")
 }
 
 
