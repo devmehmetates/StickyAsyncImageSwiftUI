@@ -1,6 +1,43 @@
 import SwiftUI
 
 @available(iOS 15.0, *)
+public struct StickyTopView<Content: View>: View {
+    private var content: Content
+    let model: StickyViewModel
+    
+    init(_ model: StickyViewModel = ._defaultModel, @ViewBuilder _ content: () -> Content) {
+        self.model = model
+        self.content = content()
+    }
+    
+    public var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let calculatedHeight = (size.height + proxy.frame(in: .named(model.coordinateSpace)).minY * 1.5)
+            let actualHeight = calculatedHeight < model.height ? model.height : calculatedHeight
+            
+            VStack {
+                content
+                    .frame(width: size.width, height: actualHeight, alignment: .bottom)
+            }.frame(width: model.width, height: model.height, alignment: .bottom)
+               
+        }.frame(width: model.width, height: model.height, alignment: .bottom)
+           
+    }
+}
+
+@available(iOS 15.0, *)
+public struct StickyViewModel {
+    let width: CGFloat = 100.0.responsiveW
+    var height: CGFloat = 100.0.responsiveW
+    let coordinateSpace: AnyHashable
+    var linearGradient: LinearGradient?
+    
+    static let _defaultModel: StickyViewModel = StickyViewModel(coordinateSpace: "Sticky")
+}
+
+
+@available(iOS 15.0, *)
 public struct StickyAsyncImageSwiftUI: View {
     private let url: URL?
     private let size: CGFloat
