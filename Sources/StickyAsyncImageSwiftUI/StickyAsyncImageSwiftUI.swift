@@ -5,7 +5,7 @@ public struct StickyTopView<Content: View>: View {
     private var content: Content
     let model: StickyViewModel
     
-    init(_ model: StickyViewModel = ._defaultModel, @ViewBuilder _ content: () -> Content) {
+    public init(_ model: StickyViewModel = ._defaultModel, @ViewBuilder _ content: () -> Content) {
         self.model = model
         self.content = content()
     }
