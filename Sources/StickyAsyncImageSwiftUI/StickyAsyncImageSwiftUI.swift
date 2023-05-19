@@ -33,6 +33,13 @@ public struct StickyViewModel {
     let coordinateSpace: AnyHashable
     var linearGradient: LinearGradient?
     
+    public init(_ width: CGFloat = 100.0.responsiveW, _ height: CGFloat = 100.0.responsiveW, coordinateSpace: AnyHashable = "Stikcy", linearGradient: LinearGradient? = nil) {
+        self.width = width
+        self.height = height
+        self.coordinateSpace = coordinateSpace
+        self.linearGradient = linearGradient
+    }
+    
     public static let _defaultModel: StickyViewModel = StickyViewModel(coordinateSpace: "Sticky")
 }
 
