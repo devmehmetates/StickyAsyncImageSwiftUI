@@ -28,7 +28,7 @@ public struct StickyTopView<Content: View>: View {
 
 @available(iOS 15.0, *)
 public struct StickyViewModel {
-    let width: CGFloat = 100.0.responsiveW
+    var width: CGFloat = 100.0.responsiveW
     var height: CGFloat = 100.0.responsiveW
     let coordinateSpace: AnyHashable
     var linearGradient: LinearGradient?
