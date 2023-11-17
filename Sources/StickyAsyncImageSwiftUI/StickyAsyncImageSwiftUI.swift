@@ -1,74 +1,48 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
-public struct StickyTopView<Content: View>: View {
-    private var content: Content
-    let model: StickyViewModel
+@available(iOS 13.0, *)
+public struct StickyTopViewModifier: ViewModifier {
+    var height: CGFloat = 30.0.responsiveH
     
-    public init(_ model: StickyViewModel = ._defaultModel, @ViewBuilder _ content: () -> Content) {
-        self.model = model
-        self.content = content()
-    }
-    
-    public var body: some View {
+    public func body(content: Content) -> some View {
         GeometryReader { proxy in
             let size = proxy.size
-            let calculatedHeight = (size.height + proxy.frame(in: .named(model.coordinateSpace)).minY * 1.5)
-            let actualHeight = calculatedHeight < model.height ? model.height : calculatedHeight
-            
-            VStack {
-                content
-                    .frame(width: size.width, height: actualHeight, alignment: .bottom)
-            }.frame(width: model.width, height: model.height, alignment: .bottom)
-               
-        }.frame(width: model.width, height: model.height, alignment: .bottom)
-           
+            let calculatedHeight = (size.height + proxy.frame(in: .global).minY * 1.5)
+            let actualHeight = max(calculatedHeight, height)
+            content
+                .frame(width: size.width, height: actualHeight, alignment: .bottom)
+                .frame(width: 100.0.responsiveW, height: height, alignment: .bottom)
+        }.frame(width: 100.0.responsiveW, height: height, alignment: .bottom)
     }
 }
 
 @available(iOS 15.0, *)
-public struct StickyViewModel {
-    let width: CGFloat = 100.0.responsiveW
-    var height: CGFloat = 100.0.responsiveW
-    let coordinateSpace: AnyHashable
-    var linearGradient: LinearGradient?
-    
-    public static let _defaultModel: StickyViewModel = StickyViewModel(coordinateSpace: "Sticky")
-}
-
-
-@available(iOS 15.0, *)
-public struct StickyAsyncImageSwiftUI: View {
-    private let url: URL?
-    private let size: CGFloat
-    private let widthConstant: CGFloat = 100.0.responsiveW
-    private let coordinateSpace: AnyHashable
-    private let isGradientOn: Bool
-    private let linearGradient: LinearGradient
-    
-    public init(url: URL?, size: CGFloat? = nil, coordinateSpace: AnyHashable, isGradientOn: Bool? = nil, linearGradient: LinearGradient? = nil) {
-        self.url = url
-        self.size = size ?? 100.0.responsiveW
-        self.coordinateSpace = coordinateSpace
-        self.isGradientOn = isGradientOn ?? false
-        self.linearGradient = linearGradient ?? LinearGradient(colors: [.clear, .accentColor], startPoint: .top, endPoint: .bottom)
+public struct AnimatableAsyncImageView<Content: View>: View {
+    private var contentUrl: URL? {
+        if let urlPath {
+            return URL(string: urlPath)
+        } else {
+            return url
+        }
     }
     
+    var urlPath: String?
+    var url: URL?
+    var scale: CGFloat = 1
+    var transaction: Transaction = .init(animation: .spring)
+    @ViewBuilder var content: (_ image: Image) -> Content
+    
     public var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            let height = (size.height + proxy.frame(in: .named(coordinateSpace)).minY * 1.5)
-           
-            AnimatedAsyncImageView(url, width: size.width, height: height < self.size ? self.size : height, cornerRadius: 0)
-                .frame(width: widthConstant, height: self.size, alignment: .bottom)
+
+            AsyncImage(url: contentUrl, scale: scale, transaction: transaction) { phase in
+                if let image = phase.image {
+                    content(image)
+                } else {
+                    Rectangle()
+                        .foregroundStyle(.quaternary)
+                }
             
-            if isGradientOn {
-                Rectangle()
-                    .frame(width: size.width, height: height < self.size ? self.size : height, alignment: .bottom)
-                    .frame(width: widthConstant, height: self.size, alignment: .bottom)
-                    .foregroundStyle(linearGradient)
-            }
-        }.frame(width: widthConstant, height: self.size)
+        }
     }
 }
 
@@ -78,8 +52,24 @@ struct StickyAsyncImageSwiftUI_Previews : PreviewProvider {
     static var previews: some View {
         
         if #available(iOS 15.0, *) {
+            ExampleView()
+        } else {
+            // Fallback on earlier versions
+        }
+    }
+}
+
+@available(iOS 15.0, *)
+struct ExampleView: View {
+    var body: some View {
+        NavigationView {
             ScrollView {
-                StickyAsyncImageSwiftUI(url: URL(string: "https://soundjungle.de/wp-content/uploads/2022/10/1-Tate_McRae_main_photo_c_baeth.jpg"), coordinateSpace: "Sticky", isGradientOn: true)
+                AnimatableAsyncImageView(urlPath: "https://instagram.fist6-1.fna.fbcdn.net/v/t51.2885-15/402510728_7200911533305290_5072197548607039498_n.jpg?stp=c143.0.433.433a_dst-jpg_e15_s320x320&_nc_ht=instagram.fist6-1.fna.fbcdn.net&_nc_cat=1&_nc_ohc=asSd-0Nw3wIAX8QtTs4&edm=APU89FABAAAA&ccb=7-5&oh=00_AfCOkCFGYYwLL2MTPZ25ML1xBCThF1Q4abqLceNgBDg66w&oe=655957E0&_nc_sid=bc0c2c") { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                }.modifier(StickyTopViewModifier(height: 40.0.responsiveH))
+                
                 ForEach(0..<10) { number in
                     Group {
                         VStack {
@@ -88,17 +78,15 @@ struct StickyAsyncImageSwiftUI_Previews : PreviewProvider {
                         Divider()
                     }.frame(width: 90.0.responsiveW)
                 }.padding(.top)
-            }.coordinateSpace(name: "Sticky")
-                .ignoresSafeArea(edges: .top)
-            
-        } else {
-            // Fallback on earlier versions
+            }
+
         }
     }
 }
 #endif
 
 @available(iOS 15.0, *)
+@available(iOS, introduced: 13.0, deprecated, renamed: "AnimatableAsyncImageView", message: "")
 private struct AnimatedAsyncImageView: View {
     @State private var refleshState: Bool = false
     private let imageURL: URL?
@@ -170,4 +158,79 @@ private struct AnimatedAsyncImageView: View {
             }.frame(width: imageWidth, height: imageHeight, alignment: .center)
         }
     }
+}
+
+// MARK: - Deprecated
+@available(iOS 15.0, *)
+@available(*, deprecated, renamed: "StickyTopViewModifier", message: "")
+public struct StickyTopView<Content: View>: View {
+    private var content: Content
+    let model: StickyViewModel
+    
+    public init(_ model: StickyViewModel = ._defaultModel, @ViewBuilder _ content: () -> Content) {
+        self.model = model
+        self.content = content()
+    }
+    
+    public var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let calculatedHeight = (size.height + proxy.frame(in: .named(model.coordinateSpace)).minY * 1.5)
+            let actualHeight = calculatedHeight < model.height ? model.height : calculatedHeight
+            
+            VStack {
+                content
+                    .frame(width: size.width, height: actualHeight, alignment: .bottom)
+            }.frame(width: model.width, height: model.height, alignment: .bottom)
+               
+        }.frame(width: model.width, height: model.height, alignment: .bottom)
+           
+    }
+}
+
+@available(iOS 15.0, *)
+@available(*, deprecated, renamed: "StickyTopViewModifier", message: "")
+public struct StickyAsyncImageSwiftUI: View {
+    private let url: URL?
+    private let size: CGFloat
+    private let widthConstant: CGFloat = 100.0.responsiveW
+    private let coordinateSpace: AnyHashable
+    private let isGradientOn: Bool
+    private let linearGradient: LinearGradient
+    
+    public init(url: URL?, size: CGFloat? = nil, coordinateSpace: AnyHashable, isGradientOn: Bool? = nil, linearGradient: LinearGradient? = nil) {
+        self.url = url
+        self.size = size ?? 100.0.responsiveW
+        self.coordinateSpace = coordinateSpace
+        self.isGradientOn = isGradientOn ?? false
+        self.linearGradient = linearGradient ?? LinearGradient(colors: [.clear, .accentColor], startPoint: .top, endPoint: .bottom)
+    }
+    
+    public var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let height = (size.height + proxy.frame(in: .named(coordinateSpace)).minY * 1.5)
+           
+            AnimatedAsyncImageView(url, width: size.width, height: height < self.size ? self.size : height, cornerRadius: 0)
+                .frame(width: widthConstant, height: self.size, alignment: .bottom)
+            
+            if isGradientOn {
+                Rectangle()
+                    .frame(width: size.width, height: height < self.size ? self.size : height, alignment: .bottom)
+                    .frame(width: widthConstant, height: self.size, alignment: .bottom)
+                    .foregroundStyle(linearGradient)
+            }
+        }.frame(width: widthConstant, height: self.size)
+    }
+}
+
+@available(iOS 15.0, *)
+@available(iOS, introduced: 13.0, deprecated, renamed: "StickyTopViewModifier", message: "Deleted")
+public struct StickyViewModel {
+    let width: CGFloat = 100.0.responsiveW
+    var height: CGFloat = 100.0.responsiveW
+    let coordinateSpace: AnyHashable
+    var linearGradient: LinearGradient?
+    
+    public static let _defaultModel: StickyViewModel = StickyViewModel(coordinateSpace: "Sticky")
 }
