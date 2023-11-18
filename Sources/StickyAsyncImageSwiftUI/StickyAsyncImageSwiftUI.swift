@@ -4,6 +4,10 @@ import SwiftUI
 public struct StickyTopViewModifier: ViewModifier {
     var height: CGFloat = 30.0.responsiveH
     
+    public init(height: CGFloat) {
+        self.height = height
+    }
+
     public func body(content: Content) -> some View {
         GeometryReader { proxy in
             let size = proxy.size
