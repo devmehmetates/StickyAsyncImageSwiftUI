@@ -18,30 +18,36 @@ public struct StickyTopViewModifier: ViewModifier {
 
 @available(iOS 15.0, *)
 public struct AnimatableAsyncImageView<Content: View>: View {
-    private var contentUrl: URL? {
+    private var contentUrl: URL?
+    private var scale: CGFloat
+    private var transaction: Transaction
+    @ViewBuilder private var content: (_ image: Image) -> Content
+
+    public init(
+        urlPath: String? = nil,
+        url: URL? = nil,
+        scale: CGFloat = 1,
+        transaction: Transaction = .init(animation: .spring),
+        content: @escaping (_: Image) -> Content
+    ) {
         if let urlPath {
-            return URL(string: urlPath)
+            contentUrl = URL(string: urlPath)
         } else {
-            return url
+            contentUrl = url
         }
+        self.scale = scale
+        self.transaction = transaction
+        self.content = content
     }
     
-    var urlPath: String?
-    var url: URL?
-    var scale: CGFloat = 1
-    var transaction: Transaction = .init(animation: .spring)
-    @ViewBuilder var content: (_ image: Image) -> Content
-    
     public var body: some View {
-
-            AsyncImage(url: contentUrl, scale: scale, transaction: transaction) { phase in
-                if let image = phase.image {
-                    content(image)
-                } else {
-                    Rectangle()
-                        .foregroundStyle(.quaternary)
-                }
-            
+        AsyncImage(url: contentUrl, scale: scale, transaction: transaction) { phase in
+            if let image = phase.image {
+                content(image)
+            } else {
+                Rectangle()
+                    .foregroundStyle(.quaternary)
+            }
         }
     }
 }
