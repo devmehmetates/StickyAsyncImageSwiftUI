@@ -21,13 +21,51 @@ public struct StickyTopViewModifier: ViewModifier {
 }
 
 @available(iOS 15.0, *)
-public struct AnimatableAsyncImageView<Content: View>: View {
+public struct AnimatableAsyncImageView<Content: View, Placeholder: View, ErrorView: View>: View {
     private var contentUrl: URL?
     private var scale: CGFloat
     private var transaction: Transaction
     @ViewBuilder private var content: (_ image: Image) -> Content
+    @ViewBuilder private var placeholder: Placeholder
+    @ViewBuilder private var errorView: ErrorView
 
     public init(
+        urlPath: String? = nil,
+        url: URL? = nil,
+        scale: CGFloat = 1,
+        transaction: Transaction = .init(animation: .spring),
+        content: @escaping (_: Image) -> Content,
+        @ViewBuilder placeholder: () -> Placeholder,
+        @ViewBuilder errorView: () -> ErrorView
+    ) {
+        if let urlPath {
+            contentUrl = URL(string: urlPath)
+        } else {
+            contentUrl = url
+        }
+        self.scale = scale
+        self.transaction = transaction
+        self.content = content
+        self.placeholder = placeholder()
+        self.errorView = errorView()
+    }
+    
+    public var body: some View {
+        AsyncImage(url: contentUrl, scale: scale, transaction: transaction) { phase in
+            if let image = phase.image {
+                content(image)
+            } else if phase.error != nil {
+                errorView
+            } else {
+                placeholder
+            }
+        }
+    }
+}
+
+@available(iOS 15.0, *)
+public extension AnimatableAsyncImageView where Placeholder == EmptyView, ErrorView == EmptyView {
+    init(
         urlPath: String? = nil,
         url: URL? = nil,
         scale: CGFloat = 1,
@@ -42,17 +80,54 @@ public struct AnimatableAsyncImageView<Content: View>: View {
         self.scale = scale
         self.transaction = transaction
         self.content = content
+        self.placeholder = EmptyView()
+        self.errorView = EmptyView()
     }
-    
-    public var body: some View {
-        AsyncImage(url: contentUrl, scale: scale, transaction: transaction) { phase in
-            if let image = phase.image {
-                content(image)
-            } else {
-                Rectangle()
-                    .foregroundStyle(.quaternary)
-            }
+}
+
+@available(iOS 15.0, *)
+public extension AnimatableAsyncImageView where Placeholder == EmptyView {
+    init(
+        urlPath: String? = nil,
+        url: URL? = nil,
+        scale: CGFloat = 1,
+        transaction: Transaction = .init(animation: .spring),
+        content: @escaping (_: Image) -> Content,
+        @ViewBuilder errorView: () -> ErrorView
+    ) {
+        if let urlPath {
+            contentUrl = URL(string: urlPath)
+        } else {
+            contentUrl = url
         }
+        self.scale = scale
+        self.transaction = transaction
+        self.content = content
+        self.placeholder = EmptyView()
+        self.errorView = errorView()
+    }
+}
+
+@available(iOS 15.0, *)
+public extension AnimatableAsyncImageView where ErrorView == EmptyView {
+    init(
+        urlPath: String? = nil,
+        url: URL? = nil,
+        scale: CGFloat = 1,
+        transaction: Transaction = .init(animation: .spring),
+        content: @escaping (_: Image) -> Content,
+        @ViewBuilder placeholder: () -> Placeholder
+    ) {
+        if let urlPath {
+            contentUrl = URL(string: urlPath)
+        } else {
+            contentUrl = url
+        }
+        self.scale = scale
+        self.transaction = transaction
+        self.content = content
+        self.placeholder = placeholder()
+        self.errorView = EmptyView()
     }
 }
 
@@ -74,7 +149,7 @@ struct ExampleView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                AnimatableAsyncImageView(urlPath: "https://instagram.fist6-1.fna.fbcdn.net/v/t51.2885-15/402510728_7200911533305290_5072197548607039498_n.jpg?stp=c143.0.433.433a_dst-jpg_e15_s320x320&_nc_ht=instagram.fist6-1.fna.fbcdn.net&_nc_cat=1&_nc_ohc=asSd-0Nw3wIAX8QtTs4&edm=APU89FABAAAA&ccb=7-5&oh=00_AfCOkCFGYYwLL2MTPZ25ML1xBCThF1Q4abqLceNgBDg66w&oe=655957E0&_nc_sid=bc0c2c") { image in
+                AnimatableAsyncImageView(urlPath: "https://picsum.photos/1200/1200") { image in
                     image
                         .resizable()
                         .scaledToFill()
