@@ -2,10 +2,12 @@ import SwiftUI
 
 @available(iOS 13.0, *)
 public struct StickyTopViewModifier: ViewModifier {
-    var height: CGFloat = 30.0.responsiveH
+    var height: CGFloat
+    var anchor: Alignment
     
-    public init(height: CGFloat) {
+    public init(height: CGFloat = 300, anchor: Alignment = .bottom) {
         self.height = height
+        self.anchor = anchor
     }
 
     public func body(content: Content) -> some View {
@@ -14,7 +16,8 @@ public struct StickyTopViewModifier: ViewModifier {
             let calculatedHeight = (size.height + proxy.frame(in: .global).minY * 1.5)
             let actualHeight = max(calculatedHeight, height)
             content
-                .frame(width: size.width, height: actualHeight, alignment: .bottom)
+                .frame(width: size.width, height: actualHeight, alignment: anchor)
+                .clipped()
                 .frame(width: 100.0.responsiveW, height: height, alignment: .bottom)
         }.frame(width: 100.0.responsiveW, height: height, alignment: .bottom)
     }
@@ -153,7 +156,7 @@ struct ExampleView: View {
                     image
                         .resizable()
                         .scaledToFill()
-                }.modifier(StickyTopViewModifier(height: 40.0.responsiveH))
+                }.modifier(StickyTopViewModifier(height: 40.0.responsiveH, anchor: .top))
                 
                 ForEach(0..<10) { number in
                     Group {
