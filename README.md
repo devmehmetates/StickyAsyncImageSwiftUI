@@ -17,14 +17,11 @@ import StickyAsyncImageSwiftUI
 struct ExampleView: View {
     var body: some View {
         NavigationView {
-            ScrollView {
-                AnimatableAsyncImageView(urlPath: "url") { image in // Your Sticky View
-                    image
-                        .resizable()
+                ScrollView {
+                AsyncImage(url: .init(string: "url")) { image in
+                    image.image?.resizable()
                         .scaledToFill()
-                }.modifier(StickyTopViewModifier(height: 40.0.responsiveH))
-                
-                // Your Views
+                }.makeSticky(height: 200)
             }
         }
     }
