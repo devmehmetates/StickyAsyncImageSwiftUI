@@ -8,6 +8,6 @@
 import SwiftUI
 
 extension Double {
-    var responsiveW: Double { return (UIScreen.main.bounds.size.width * self) / 100 }
-    var responsiveH: Double { return (UIScreen.main.bounds.size.height * self) / 100 }
+    var relativeToWidth: Double { return (UIScreen.main.bounds.size.width * self) / 100 }
+    var relativeToHeight: Double { return (UIScreen.main.bounds.size.height * self) / 100 }
 }
